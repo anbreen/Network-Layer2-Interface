@@ -19,7 +19,6 @@ In this case case there is an open netlink socket that is continuously monitored
 Whenever CL2I will receive a message from the HA, indicating to join a specific ESSID along with the name of the interface on which we want to connect, CL2I will call the following method 
 
 ```
-#!C
 void makeessid(char *interfacename)
 ```
 
