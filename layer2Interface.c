@@ -46,7 +46,7 @@ struct node {			// single node of the link list
 };
 
 typedef struct Statusinfo// structure used to maintain and fetch the status fo every interface
-{
+{ 
 	int up;
 	int running;
 } Status_info;
