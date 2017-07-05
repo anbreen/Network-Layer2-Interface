@@ -70,30 +70,26 @@ int OpenUDC()			// function to open a connection with HA
 		exit(0);
 	}
 
-	if (setsockopt(socketFD, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int))
-			== -1) {
+	if (setsockopt(socketFD, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int)) == -1) {
 		perror("setsockopt");
 		exit(1);
 	}
 
 	clientAddress.sin_family = AF_INET;
 	clientAddress.sin_addr.s_addr = inet_addr("127.0.0.1");
-	;
 	clientAddress.sin_port = htons(CL2IPortNo);
 	memset(clientAddress.sin_zero, '\0', sizeof clientAddress.sin_zero);
-	if (bind(socketFD, (struct sockaddr*) &clientAddress, sizeof(clientAddress))
-			== -1) {
+	if (bind(socketFD, (struct sockaddr*) &clientAddress, sizeof(clientAddress)) == -1) {
 		perror("\nBind");
 		return -1;
 	}
 
 	// 3. Client Connects with the Server at the Server's Listening Port
 	serverAddress.sin_family = AF_INET;
-	serverAddress.sin_addr.s_addr = inet_addr("127.0.0.1");			//
+	serverAddress.sin_addr.s_addr = inet_addr("127.0.0.1");	
 	serverAddress.sin_port = htons(serverPortNo);
 	memset(serverAddress.sin_zero, '\0', sizeof serverAddress.sin_zero);
-	if (connect(socketFD, (struct sockaddr*) &serverAddress,
-			sizeof(serverAddress)) == -1) {
+	if (connect(socketFD, (struct sockaddr*) &serverAddress, sizeof(serverAddress)) == -1) {
 		perror("Connect");
 		return -1;
 	}
@@ -112,9 +108,9 @@ node * getnode() // function to allocate memory to a node of link list
 		return (temp);
 }
 
-void getIP(Trigger_info *Tinfo, int iofd) // when link up trigger is generated we all need to send the IP address in the trigger infor to the HA
+// when link up trigger is generated we all need to send the IP address in the trigger infor to the HA
+void getIP(Trigger_info *Tinfo, int iofd) 
 {
-
 	int i;
 	struct ifreq ifreq;
 	struct sockaddr_in *sin;
@@ -128,12 +124,9 @@ void getIP(Trigger_info *Tinfo, int iofd) // when link up trigger is generated w
 
 }
 
-void MakeWireInfo(struct wireinfo *winfo, const iwqual *qual,
-		const iwrange * range, int has_range) {
+void MakeWireInfo(struct wireinfo *winfo, const iwqual *qual, const iwrange * range, int has_range) {
 	int len;
-	if (has_range
-			&& ((qual->level != 0)
-					|| (qual->updated & (IW_QUAL_DBM | IW_QUAL_RCPI)))) {
+	if (has_range && ((qual->level != 0) || (qual->updated & (IW_QUAL_DBM | IW_QUAL_RCPI)))) {
 		if (!(qual->updated & IW_QUAL_QUAL_INVALID)) {
 			winfo->link = qual->qual;
 		}
@@ -186,10 +179,8 @@ void StatusFuntion(Status_info *Sinfo, char *interfacename) // fetch and maintai
 {
 	int fd;
 	struct ifreq ifreq;
-
 	fd = socket(AF_INET, SOCK_STREAM, 0);
 	strcpy(ifreq.ifr_name, interfacename);
-
 	if ((ioctl(fd, SIOCGIFFLAGS, &ifreq) < 0)) {
 		Sinfo->up = 0;
 		Sinfo->running = 0;
@@ -236,7 +227,6 @@ int DeleteFromInterfaceList(int HASocket) {
 	} else {
 
 		while (current != NULL) {
-
 			Status_info Sinfo;
 			StatusFuntion(&Sinfo, current->data);
 
@@ -244,34 +234,29 @@ int DeleteFromInterfaceList(int HASocket) {
 				printf("\n****\n");
 				printf("LINK DOWN \n");
 				if (current == head) {
-
 					if ((current->next) == NULL) {
 						Trigger_info Tinfo;
 						strcpy(Tinfo.interfaceName, current->data);
 						Tinfo.type = 2;
 						strcpy(Tinfo.IP, " ");
 						//getIP(&sinfo);
-						if (send(HASocket, &Tinfo, sizeof(Trigger_info), 0)
-								== -1)
+						if (send(HASocket, &Tinfo, sizeof(Trigger_info), 0) == -1)
 							perror("send");
 						head = NULL;
 					} else {
 						strcpy(undel, current->data);
-
 						Trigger_info Tinfo;
 						strcpy(Tinfo.interfaceName, current->data);
 						Tinfo.type = 2;
 						strcpy(Tinfo.IP, " ");
 						//getIP(&sinfo);
-						if (send(HASocket, &Tinfo, sizeof(Trigger_info), 0)
-								== -1)
+						if (send(HASocket, &Tinfo, sizeof(Trigger_info), 0) == -1)
 							perror("send");
 						current = current->next;
 						free(head);
 						head = current;
 
 					}
-
 				} else {
 					Trigger_info Tinfo;
 					strcpy(Tinfo.interfaceName, current->data);
@@ -283,7 +268,6 @@ int DeleteFromInterfaceList(int HASocket) {
 					strcpy(undel, current->data);
 					save->next = current->next;
 					free(current);
-
 				}
 			}
 			save = current;
@@ -300,7 +284,6 @@ int AddInterfaceList(char *x) {
 	} else {
 		strcpy(temp->data, x);
 		temp->next = NULL;
-
 		if (head == NULL)
 			head = temp;
 		else {
@@ -313,18 +296,15 @@ int AddInterfaceList(char *x) {
 		}
 		return 0;
 	}
-
 }
 
 void display() {
 	current = head;
 	if (current == NULL)
 		printf("\aThe List Is Empty!\n");
-
 	while (current != NULL) {
 		printf("\n: %s", current->data);
 		current = current->next;
-
 	}
 	printf("\n");
 }
@@ -351,7 +331,6 @@ int main(int argc, char *argv[]) {
 		char Names[100];
 		char buff[1024];
 		int searchresult = 0;
-
 		ifc.ifc_len = sizeof(buff);
 		ifc.ifc_buf = buff;
 		if (ioctl(iofd, SIOCGIFCONF, &ifc) < 0) {
@@ -381,12 +360,10 @@ int main(int argc, char *argv[]) {
 							sinfo.type = 1;
 							strcpy(sinfo.interfaceName, Names);
 							getIP(&sinfo, iofd);
-							if (send(HASocket, &sinfo, sizeof(Trigger_info), 0)
-									== -1)
+							if (send(HASocket, &sinfo, sizeof(Trigger_info), 0) == -1)
 								perror("send");
 						}
 					}
-
 					////////////////////link going dow/////////////////
 					iwrange range;
 					int has_range = 0;
@@ -397,8 +374,7 @@ int main(int argc, char *argv[]) {
 						has_range = 1;
 					struct wireinfo winfo;
 					strcpy(winfo.name, Names);
-					if (iw_get_stats(iofd, winfo.name, &stats, &range,
-							has_range) >= 0) {
+					if (iw_get_stats(iofd, winfo.name, &stats, &range, has_range) >= 0) {
 						MakeWireInfo(&winfo, &stats.qual, &range, has_range);
 						//printf("%d\n",winfo.link);
 						//printf("%d\n",winfo.level);
@@ -410,25 +386,20 @@ int main(int argc, char *argv[]) {
 							strcpy(sinfoLGR.interfaceName, winfo.name);
 							//strcpy(sinfoLGR.IP," ");
 							getIP(&sinfoLGR, iofd);
-
-							if (send(HASocket, &sinfoLGR, sizeof(Trigger_info),
-									0) == -1)
+							if (send(HASocket, &sinfoLGR, sizeof(Trigger_info),0) == -1)
 								perror("send");
 						}
 					}
 					close(skfd);
-
 				}
 			}
 			interf--;
-
 		}
 		DeleteFromInterfaceList(HASocket);
-//display();
+		//display();
 		fflush(stdin);
 		sleep(5);
 	}
-
 	close(iofd);
 	close(HASocket);
 	return 0;
